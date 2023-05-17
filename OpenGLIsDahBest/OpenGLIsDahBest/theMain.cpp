@@ -3,6 +3,8 @@
 //#include <GLFW/glfw3.h>
 #include "globalStuff.h"
 
+//1026434 Evan Benitez
+
 #include <iostream>
 //#include "linmath.h"
 #include <glm/glm.hpp>
@@ -17,19 +19,15 @@
 #include <stdio.h>
 
 #include "cShaderManager/cShaderManager.h"
+#include <fstream>
+using namespace std;
 
 
 
-//static const struct
-//{
-//    float x, y;
-//    float r, g, b;
-//} vertices[3] =
-//{
-//    { -0.6f, -0.4f, 1.f, 0.f, 0.f },            // Spawn a vertex shader instance
-//    {  0.6f, -0.4f, 0.f, 1.f, 0.f },
-//    {   0.f,  0.6f, 0.f, 0.f, 1.f }
-//};
+
+
+unsigned int numVerticesLoaded = 0;
+unsigned int numTrianglesLoaded = 0;
 
 struct sVertexXYZ_RGB
 {
@@ -37,35 +35,7 @@ struct sVertexXYZ_RGB
     float r, g, b;
 };
 
-// Google C dynamic array
-sVertexXYZ_RGB* pSexyVertex = new sVertexXYZ_RGB[11582 * 3];
 
-sVertexXYZ_RGB vertices[3] =
-{
-    { -6.6f, -0.4f, 0.0f, 1.0f, 0.0f, 0.0f },            // Spawn a vertex shader instance
-    {  6.6f, -0.4f, 0.0f, 1.0f, 0.0f, 0.0f },
-    {  6.0f,  0.6f, 0.0f, 1.0f, 0.0f, 0.0f }
-};
-
-//static const char* vertex_shader_text =
-//"#version 110\n"
-//"uniform mat4 MVP;\n"
-//"attribute vec3 vCol;\n"
-//"attribute vec2 vPos;\n"
-//"varying vec3 color;\n"
-//"void main()\n"
-//"{\n"
-//"    gl_Position = MVP * vec4(vPos.x, vPos.y, 0.0, 1.0);\n"
-//"    color = vCol;\n"
-//"}\n";
-
-//static const char* fragment_shader_text =
-//"#version 110\n"
-//"varying vec3 color;\n"
-//"void main()\n"
-//"{\n"
-//"    gl_FragColor = vec4(color, 1.0);\n"
-//"}\n";
 
 static void error_callback(int error, const char* description)
 {
@@ -78,13 +48,20 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+sVertexXYZ_RGB* pVertexArray = NULL;
+
+bool Load_Plyfile(std::string filename,
+                    sVertexXYZ_RGB* &pVertexArray,
+                    unsigned int &numVerticesLoaded,
+                    unsigned int &numTrianglesLoaded);
+
+
+
 int main(void)
 {
     GLFWwindow* window;
     GLuint vertex_buffer;
-//    GLuint vertex_shader;
-//    GLuint fragment_shader;
-//    GLuint program;
+
     GLint mvp_location, vpos_location, vcol_location;
 
     glfwSetErrorCallback(error_callback);
@@ -118,27 +95,29 @@ int main(void)
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
-    unsigned int numberOfBytes = sizeof(sVertexXYZ_RGB) * 3;
+
+
+    if (Load_Plyfile("dolphin_xyz_rgba.ply", pVertexArray, numVerticesLoaded, numTrianglesLoaded))
+    {
+        std::cout<<"File loaded OK" <<std::endl;
+    }
+    else
+    {
+        std::cout << "Error" << std::endl;
+    }
+        
+
+    unsigned int numberOfBytes = sizeof(sVertexXYZ_RGB) * numTrianglesLoaded * 3;
+
     
     glBufferData(GL_ARRAY_BUFFER, 
                  numberOfBytes,    // Each vertex in bytes
-                 vertices,                  // Pointer to the start of the array
+                 pVertexArray,                  // Pointer to the start of the array
                  GL_STATIC_DRAW);
 
-//
-//    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-//    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
-//    glCompileShader(vertex_shader);
-//
-//    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-//    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-//    glCompileShader(fragment_shader);
-//
-//    program = glCreateProgram();
-//    glAttachShader(program, vertex_shader);
-//    glAttachShader(program, fragment_shader);
-//    glLinkProgram(program);
-// 
+
+    delete[] pVertexArray;
+
     cShaderManager* pShaderManager = new cShaderManager();
 
     cShaderManager::cShader vertexShader;
@@ -163,10 +142,7 @@ int main(void)
     mvp_location = glGetUniformLocation(shaderProgram, "MVP");
 
 
-// Vertex layout specification
- //   struct sVertexXYZ_RGB {
-//        float x, y, z;      // vec2 to vec3 
-//        float r, g, b;  };
+
     vpos_location = glGetAttribLocation(shaderProgram, "vPos");
     vcol_location = glGetAttribLocation(shaderProgram, "vCol");
 
@@ -207,7 +183,8 @@ int main(void)
         m = glm::mat4(1.0f);        // Identity matrix
 //        mat4x4_rotate_Z(m, m, (float)glfwGetTime());
         glm::mat4 matRotateZ = glm::rotate(glm::mat4(1.0f),
-                                           0.0f, ///(float)glfwGetTime(),
+                                           //0.0f, 
+                                           (float)glfwGetTime(),
                                            glm::vec3(0.0f, 1.0f, 0.0f));
 //        mat4x4_mul(mvp, p, m);
         m = matRotateZ * m;
@@ -222,7 +199,7 @@ int main(void)
 
         v = glm::mat4(1.0f);
 
-        glm::vec3 cameraEye = glm::vec3(0.0, 0.0, -40.0f);
+        glm::vec3 cameraEye = glm::vec3(0.0, 0.0, -600.0f);
         glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -244,7 +221,9 @@ int main(void)
         // GL_POINT, GL_LINE, and GL_FILL
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        unsigned int numberOfVetricesToDraw = numTrianglesLoaded * 3;
+        glDrawArrays(GL_TRIANGLES, 0, numberOfVetricesToDraw);
 
 
         glfwSwapBuffers(window);
@@ -256,4 +235,154 @@ int main(void)
     glfwTerminate();
 //    exit(EXIT_SUCCESS);
     return 0;
+}
+
+bool Load_Plyfile(  std::string filename,
+                    sVertexXYZ_RGB* &pVertexArray,
+                    unsigned int &numVerticesLoaded,
+                    unsigned int &numTrianglesLoaded )
+{
+    std::ifstream fileToLoad(filename.c_str());
+
+    if (fileToLoad.is_open() == false)
+    {
+        return false;
+    }
+
+
+    std::string tempToken;
+    while (fileToLoad >> tempToken)
+    {
+        if (tempToken == "vertex")
+        {
+            break;
+        }
+    }
+
+    fileToLoad >> numVerticesLoaded;
+
+    while (fileToLoad >> tempToken)
+    {
+        if (tempToken == "face")
+        {
+            break;
+        }
+    }
+
+    fileToLoad >> numTrianglesLoaded;
+
+    while (fileToLoad >> tempToken)
+    {
+        if (tempToken == "end_header")
+        {
+            break;
+        }
+    }
+
+
+    struct sTempPlyFileVertex 
+    {
+        float x;
+        float y;
+        float z;
+        int red;
+        int green;
+        int blue;
+        int alpha;
+
+    };
+
+    std::vector< sTempPlyFileVertex> VectorVertexFromFile;
+
+    for (unsigned int count = 0; count < numVerticesLoaded; count++)
+    {
+        sTempPlyFileVertex tempVertexLoaded;
+
+        fileToLoad >> tempVertexLoaded.x;
+        fileToLoad >> tempVertexLoaded.y;
+        fileToLoad >> tempVertexLoaded.z;
+        fileToLoad >> tempVertexLoaded.red;
+        fileToLoad >> tempVertexLoaded.green;
+        fileToLoad >> tempVertexLoaded.blue;
+        fileToLoad >> tempVertexLoaded.alpha;
+
+        VectorVertexFromFile.push_back(tempVertexLoaded);
+
+    }
+
+    struct sTempPlyFileTriangle
+    {
+        unsigned int vertex_0;
+        unsigned int vertex_1;
+        unsigned int vertex_2;
+
+    };
+
+    std::vector< sTempPlyFileTriangle> VectorTrianglesFromFile;
+
+    for (unsigned int count = 0; count < numTrianglesLoaded; count++)
+    {
+        sTempPlyFileTriangle tempTrianglesLoaded;
+
+        unsigned int discardThis = 0;
+        fileToLoad >> discardThis;
+
+        fileToLoad >> tempTrianglesLoaded.vertex_0;
+        fileToLoad >> tempTrianglesLoaded.vertex_1;
+        fileToLoad >> tempTrianglesLoaded.vertex_2;
+
+        VectorTrianglesFromFile.push_back(tempTrianglesLoaded);
+
+    }
+
+    unsigned int totalNumberOfVerticesToDraw = numTrianglesLoaded * 3;
+
+    pVertexArray = new sVertexXYZ_RGB[totalNumberOfVerticesToDraw];
+
+    unsigned int finalVertexArrayIndex = 0;
+
+    for (unsigned int triangleIndex = 0; triangleIndex != VectorTrianglesFromFile.size(); triangleIndex++)
+    {
+        unsigned int vertexIndex_0 = VectorTrianglesFromFile[triangleIndex].vertex_0;
+
+        pVertexArray[finalVertexArrayIndex].x = VectorVertexFromFile[vertexIndex_0].x;
+        pVertexArray[finalVertexArrayIndex].y = VectorVertexFromFile[vertexIndex_0].y;
+        pVertexArray[finalVertexArrayIndex].z = VectorVertexFromFile[vertexIndex_0].z;
+
+        pVertexArray[finalVertexArrayIndex].r = static_cast<float>(VectorVertexFromFile[vertexIndex_0].red / 255.0f);
+        pVertexArray[finalVertexArrayIndex].g = static_cast<float>(VectorVertexFromFile[vertexIndex_0].green / 255.0f);
+        pVertexArray[finalVertexArrayIndex].b = static_cast<float>(VectorVertexFromFile[vertexIndex_0].blue / 255.0f);
+        finalVertexArrayIndex++;
+
+
+        unsigned int vertexIndex_1 = VectorTrianglesFromFile[triangleIndex].vertex_1;
+
+        pVertexArray[finalVertexArrayIndex].x = VectorVertexFromFile[vertexIndex_1].x;
+        pVertexArray[finalVertexArrayIndex].y = VectorVertexFromFile[vertexIndex_1].y;
+        pVertexArray[finalVertexArrayIndex].z = VectorVertexFromFile[vertexIndex_1].z;
+
+        pVertexArray[finalVertexArrayIndex].r = static_cast<float>(VectorVertexFromFile[vertexIndex_1].red / 255.0f);
+        pVertexArray[finalVertexArrayIndex].g = static_cast<float>(VectorVertexFromFile[vertexIndex_1].green / 255.0f);
+        pVertexArray[finalVertexArrayIndex].b = static_cast<float>(VectorVertexFromFile[vertexIndex_1].blue / 255.0f);
+        finalVertexArrayIndex++;
+
+        unsigned int vertexIndex_2 = VectorTrianglesFromFile[triangleIndex].vertex_2;
+
+        pVertexArray[finalVertexArrayIndex].x = VectorVertexFromFile[vertexIndex_2].x;
+        pVertexArray[finalVertexArrayIndex].y = VectorVertexFromFile[vertexIndex_2].y;
+        pVertexArray[finalVertexArrayIndex].z = VectorVertexFromFile[vertexIndex_2].z;
+
+        pVertexArray[finalVertexArrayIndex].r = static_cast<float>(VectorVertexFromFile[vertexIndex_2].red / 255.0f);
+        pVertexArray[finalVertexArrayIndex].g = static_cast<float>(VectorVertexFromFile[vertexIndex_2].green / 255.0f);
+        pVertexArray[finalVertexArrayIndex].b = static_cast<float>(VectorVertexFromFile[vertexIndex_2].blue / 255.0f);
+
+
+        finalVertexArrayIndex++;
+
+    }
+
+    fileToLoad.close();
+
+    return true;
+
 }
