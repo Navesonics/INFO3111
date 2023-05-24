@@ -1,22 +1,19 @@
 //#include <glad/glad.h>
 //#define GLFW_INCLUDE_NONE
 //#include <GLFW/glfw3.h>
-
-// 1026434 Evan Benitez
-
-
-
 #include "globalStuff.h"
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
+//#include "linmath.h"
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp> // glm::vec3
 #include <glm/vec4.hpp> // glm::vec4
 #include <glm/mat4x4.hpp> // glm::mat4
 #include <glm/gtc/matrix_transform.hpp> 
+// glm::translate, glm::rotate, glm::scale, glm::perspective
 #include <glm/gtc/type_ptr.hpp> // glm::value_ptr
 
 #include <stdlib.h>
@@ -25,10 +22,13 @@
 #include "cShaderManager/cShaderManager.h"
 
 #include "cVAOManager/cVAOManager.h"
+#include "cLightManager.h"
 
 #include "cMeshObject.h"
 
+#include "cLightHelper.h"
 
+//#include "../AssimpFileLoaderHelper/AssimpFileLoaderHelper.h"
 
 //static const struct
 //{
@@ -70,25 +70,6 @@ glm::vec3 g_cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 g_upVector = glm::vec3(0.0f, +1.0f, 0.0f);
 
 
-//static const char* vertex_shader_text =
-//"#version 110\n"
-//"uniform mat4 MVP;\n"
-//"attribute vec3 vCol;\n"
-//"attribute vec2 vPos;\n"
-//"varying vec3 color;\n"
-//"void main()\n"
-//"{\n"
-//"    gl_Position = MVP * vec4(vPos.x, vPos.y, 0.0, 1.0);\n"
-//"    color = vCol;\n"
-//"}\n";
-
-//static const char* fragment_shader_text =
-//"#version 110\n"
-//"varying vec3 color;\n"
-//"void main()\n"
-//"{\n"
-//"    gl_FragColor = vec4(color, 1.0);\n"
-//"}\n";
 
 static void error_callback(int error, const char* description)
 {
@@ -100,118 +81,9 @@ std::vector< cMeshObject > g_vecMeshesToDraw;
 unsigned int g_selectedMeshIndex = 2;
 
 
-//    void function_name(GLFWwindow* window, int key, int scancode, int action, int mods)
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
+cLightManager* g_pTheLights = NULL;
+bool g_bShowDebugLightSpheres = true;
 
-    const float CAMERA_MOVE_SPEED = 0.1f;
-
-    if ( mods == GLFW_MOD_SHIFT )
-    {
-        // Shift ONLY is down
-    }
-
-    // Note this is a bit mask 
-    // 0001 0010 0100 
-    // 0111 &
-    // 0110
-    // ----
-    // 0000
-    if ( (mods & GLFW_MOD_SHIFT) == GLFW_MOD_SHIFT )
-    {
-        // Shift is down and maybe other keys as well
-    }
-
-
-    //if ( key == GLFW_KEY_A )    
-    //{
-    //    // Move "left"
-    //    ::g_cameraEye.x += CAMERA_MOVE_SPEED;
-    //}
-    //if ( key == GLFW_KEY_D )    
-    //{
-    //    // Move "right"
-    //    ::g_cameraEye.x -= CAMERA_MOVE_SPEED;
-    //}
-
-    //if ( key == GLFW_KEY_W )    
-    //{
-    //    // Move "forward"
-    //    ::g_cameraEye.z += CAMERA_MOVE_SPEED;
-    //}
-    //if ( key == GLFW_KEY_S )    
-    //{
-    //    // Move "backwards"
-    //    ::g_cameraEye.z -= CAMERA_MOVE_SPEED;
-    //}
-
-    //if ( key == GLFW_KEY_Q )    
-    //{
-    //    // Move "down"
-    //    ::g_cameraEye.y -= CAMERA_MOVE_SPEED;
-    //}
-    //if ( key == GLFW_KEY_E )    
-    //{
-    //    // Move "up"
-    //    ::g_cameraEye.y += CAMERA_MOVE_SPEED;
-    //}
-}
-
-void handleKeyboardInput(GLFWwindow* window)
-{
-    const float CAMERA_MOVE_SPEED = 0.1f;
-
-    if ( glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) )
-    {
-        if ( glfwGetKey(window, GLFW_KEY_A) )
-        {
-            // Move "left"
-            ::g_vecMeshesToDraw[::g_selectedMeshIndex].orientation.x += 0.01f;
-        }
-        else
-        {
-        // Move "left"
-        ::g_cameraEye.x += CAMERA_MOVE_SPEED;
-        }
-    }
-    //if ( glfwGetKey(window, GLFW_KEY_A) )
-    //{
-    //    ::g_cameraEye.x += CAMERA_MOVE_SPEED;
-    //}
-    if (glfwGetKey(window, GLFW_KEY_D) )
-    {
-        // Move "right"
-        ::g_cameraEye.x -= CAMERA_MOVE_SPEED;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_W) )
-    {
-        // Move "forward"
-        ::g_cameraEye.z += CAMERA_MOVE_SPEED;
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) )
-    {
-        // Move "backwards"
-        ::g_cameraEye.z -= CAMERA_MOVE_SPEED;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_Q) )
-    {
-        // Move "down"
-        ::g_cameraEye.y -= CAMERA_MOVE_SPEED;
-    }
-    if (glfwGetKey(window, GLFW_KEY_E) )
-    {
-        // Move "up"
-        ::g_cameraEye.y += CAMERA_MOVE_SPEED;
-    }
-
-    return;
-}
 
 // Note I'm passing the array by reference so that the pointer
 //  value I create inside the function can be "passed back out".
@@ -251,14 +123,28 @@ bool Load_Doom_spider_mastermind_PlyFile(std::string filename,
                                  unsigned int &numTrianglesLoaded);
 
 
+// Returns NULL (or 0) if not found
+// Up to about 30-40 items, the linear search will be faster because of cache issues
+cMeshObject* pFindObjectByFriendlyName(std::string theName)
+{
+    for (unsigned int index = 0; index != ::g_vecMeshesToDraw.size(); index++ )
+    {
+        if ( ::g_vecMeshesToDraw[index].friendlyName == theName )
+        {
+            // Found it!
+            return &(::g_vecMeshesToDraw[index]);
+        }
+    }
+    // didn't find it
+    return NULL;
+}
+
+
 int main(void)
 {
-    GLFWwindow* window;
-    GLuint vertex_buffer;
-//    GLuint vertex_shader;
-//    GLuint fragment_shader;
-//    GLuint program;
-    GLint mvp_location, vpos_location, vcol_location;
+    GLFWwindow* window = NULL;
+    GLint vpos_location = 0;
+    GLint vcol_location = 0;
 
     glfwSetErrorCallback(error_callback);
 
@@ -267,10 +153,6 @@ int main(void)
 //        exit(EXIT_FAILURE);
         return -1;
     }
-
- //   sVertexXYZ_RGB* pVertexArray = new sVertexXYZ_RGB[3];
-    //int x;  // stack
-    //int* pX = new int();    // thing it points to is on the heap
 
 
 
@@ -294,62 +176,14 @@ int main(void)
 
     // NOTE: OpenGL error checks have been omitted for brevity
 
+    // How does it know about the functions?
+    // These are from the AssimpFileLoaderHelper .lib
+//    fnAssimpFileLoaderHelper("Yo!");
+
+    // Because it's "exported" we can see it. 
+//    cAssimpHelper myHelper;
 
 
-    //unsigned int numVerticesLoaded = 0;
-    //unsigned int numTrianglesLoaded = 0;
-
-//    if (Load_mig29_xyz_rgba_PlyFile( "mig29_xyz_rgba.ply",
-//    if (Load_Mushrooms1_PlyFile( "Mushrooms1 (ASCII format).ply",
-//    if (Load_Doom_spider_mastermind_PlyFile( "assets/models/spider_mastermind.bmd6model.fbx.ascii.ply",
-  //  if (Load_Doom_spider_mastermind_PlyFile( "assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply",
-  //                                   pVertexArray,
-  //                                   numVerticesLoaded,
-  //                                   numTrianglesLoaded) )
-  //  {
-  //      std::cout << "File loaded OK" << std::endl;
-  //  }
-  //  else
-  //  {
-  //      std::cout << "Error! ALL IS LOST! FOREVER LOST! Can't load PLY file." << std::endl;
-  ////      return 0;
-  //  }
-
-//    unsigned int numberOfBytes = sizeof(sVertexXYZ_RGB) * 3;
-
-//    unsigned int numberOfVerticesToDraw = numTrianglesLoaded * 3;
-
-    //glGenBuffers(1, &vertex_buffer);
-    //// Bind assign a "type" of whatever it is (a buffer)
-    //// It will make it the "current" buffer. 
-    //// The one that we are currently "bound" to
-    //glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-
-    //unsigned int numberOfBytes = sizeof(sVertexXYZ_RGB) * numTrianglesLoaded * 3;
-    //
-    //glBufferData(GL_ARRAY_BUFFER, 
-    //             numberOfBytes,    // Each vertex in bytes
-    //             pVertexArray,  // vertices,                  // Pointer to the start of the array
-    //             GL_STATIC_DRAW);
-
-    //// Note that I can delete the original array if I want to.
-    //// The data has been copied from the C++ (application) side into the GPU (video card) RAM
-    //delete [] pVertexArray;
-
-//
-//    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-//    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
-//    glCompileShader(vertex_shader);
-//
-//    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-//    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-//    glCompileShader(fragment_shader);
-//
-//    program = glCreateProgram();
-//    glAttachShader(program, vertex_shader);
-//    glAttachShader(program, fragment_shader);
-//    glLinkProgram(program);
-// 
     cShaderManager* pShaderManager = new cShaderManager();
 
     cShaderManager::cShader vertexShader;
@@ -376,7 +210,7 @@ int main(void)
     cVAOManager* pModelManger = new cVAOManager();
 
     sModelDrawInfo modelILoadedInfo;
-    /*if ( pModelManger->LoadModelIntoVAO("assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply",
+    if ( pModelManger->LoadModelIntoVAO("assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply",
                                         modelILoadedInfo, shaderProgram))
     {
         std::cout << "spider_mastermind loaded OK" << std::endl;
@@ -394,123 +228,148 @@ int main(void)
     pModelManger->LoadModelIntoVAO("assets/models/bun_zipper_xyz_n.ply", modelILoadedInfo, shaderProgram);
     std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
 
+    pModelManger->LoadModelIntoVAO("assets/models/mig29_xyz_n.ply", modelILoadedInfo, shaderProgram);
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
 
     pModelManger->LoadModelIntoVAO("assets/models/camion jugete_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;*/
-
-    pModelManger->LoadModelIntoVAO("assets/models/su47.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " su47 triangles" << std::endl;
-
-    pModelManger->LoadModelIntoVAO("assets/models/ssj100.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << "ssj100 triangles" << std::endl;
-
-    pModelManger->LoadModelIntoVAO("assets/models/mig29_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " mig29 triangles" << std::endl;
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
 
     pModelManger->LoadModelIntoVAO("assets/models/FractalTerrainFromMeshLab_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " FractalTerrain triangles" << std::endl;
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
+
+    pModelManger->LoadModelIntoVAO("assets/models/Apartment Building_26_xyz_n.ply", modelILoadedInfo, shaderProgram);
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
+
+    pModelManger->LoadModelIntoVAO("assets/models/Smooth_UV_Sphere_xyz_n.ply", modelILoadedInfo, shaderProgram);
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
+
+    cMeshObject smallSphereLightCentre;
+    smallSphereLightCentre.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
+    smallSphereLightCentre.colour = glm::vec3(1.0f, 1.0f, 1.0f);
+    smallSphereLightCentre.isWireframe = true;
+    smallSphereLightCentre.scale = 0.25f;
+    smallSphereLightCentre.friendlyName = "lightCentre";
+    smallSphereLightCentre.bDontLight = true;
+    ::g_vecMeshesToDraw.push_back(smallSphereLightCentre);
+
+    cMeshObject smallSphere90PercentBrightness;
+    smallSphere90PercentBrightness.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
+    smallSphere90PercentBrightness.colour = glm::vec3(0.5f, 0.5f, 0.0f);
+    smallSphere90PercentBrightness.isWireframe = true;
+    smallSphere90PercentBrightness.scale = 2.0f;
+    smallSphere90PercentBrightness.friendlyName = "90Percent";
+    smallSphere90PercentBrightness.bDontLight = true;
+    ::g_vecMeshesToDraw.push_back(smallSphere90PercentBrightness);
+
+    cMeshObject smallSphere50PercentBrightness;
+    smallSphere50PercentBrightness.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
+    smallSphere50PercentBrightness.colour = glm::vec3(0.0f, 0.5f, 0.5f);
+    smallSphere50PercentBrightness.isWireframe = true;
+    smallSphere50PercentBrightness.scale = 3.0f;
+    smallSphere50PercentBrightness.friendlyName = "50Percent";
+    smallSphere50PercentBrightness.bDontLight = true;
+    ::g_vecMeshesToDraw.push_back(smallSphere50PercentBrightness);
+
+    cMeshObject smallSphere25PercentBrightness;
+    smallSphere25PercentBrightness.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
+    smallSphere25PercentBrightness.colour = glm::vec3(0.0f, 0.5f, 0.0f);
+    smallSphere25PercentBrightness.isWireframe = true;
+    smallSphere25PercentBrightness.scale = 4.0f;
+    smallSphere25PercentBrightness.friendlyName = "25Percent";
+    smallSphere25PercentBrightness.bDontLight = true;
+    ::g_vecMeshesToDraw.push_back(smallSphere25PercentBrightness);
+
+    cMeshObject smallSphere05PercentBrightness;
+    smallSphere05PercentBrightness.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
+    smallSphere05PercentBrightness.colour = glm::vec3(0.5f, 0.0f, 0.5f);
+    smallSphere05PercentBrightness.isWireframe = true;
+    smallSphere05PercentBrightness.scale = 5.0f;
+    smallSphere05PercentBrightness.friendlyName = "5Percent";
+    smallSphere05PercentBrightness.bDontLight = true;
+    ::g_vecMeshesToDraw.push_back(smallSphere05PercentBrightness);
+
+    //std::vector< cMeshObject > g_vecMeshesToDraw;
+//    appartmentBuildingMesh.colour = glm::vec3(0.2f, 0.4f, 0.3f);
+
+   cMeshObject appartmentBuildingMesh;
+    appartmentBuildingMesh.meshName = "assets/models/Apartment Building_26_xyz_n.ply";
+    appartmentBuildingMesh.colour = glm::vec3(0.8f, 0.8f, 0.8f);
+//    appartmentBuildingMesh.isWireframe = true;
+    appartmentBuildingMesh.scale = 1.0f;
+    appartmentBuildingMesh.position = glm::vec3(15.0f, 0.0f, 0.0f);
+    ::g_vecMeshesToDraw.push_back(appartmentBuildingMesh);
+    //std::vector< cMeshObject > g_vecMeshesToDraw;
+//    appartmentBuildingMesh.colour = glm::vec3(0.2f, 0.4f, 0.3f);
+
 
     cMeshObject terrainMesh;
     terrainMesh.meshName = "assets/models/FractalTerrainFromMeshLab_xyz_n.ply";
     terrainMesh.colour = glm::vec3(0.8f, 0.8f, 0.8f);
-    terrainMesh.isWireframe = true;
-    terrainMesh.position = glm::vec3(0.0f, -25.0f, 0.0f);
+//    terrainMesh.isWireframe = true;
+    terrainMesh.position = glm::vec3(0.0f, -210.0f, 0.0f);
     ::g_vecMeshesToDraw.push_back(terrainMesh);
 
-    //cMeshObject SpiderMesh;
-    //SpiderMesh.meshName = "assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply";
-    //SpiderMesh.colour = glm::vec3(1.0f, 0.0f, 0.0f);
-    //SpiderMesh.isWireframe = false;
-    //SpiderMesh.position = glm::vec3(4.0f, -15.0f, 0.0f);
-    //::g_vecMeshesToDraw.push_back(SpiderMesh);
+    cMeshObject SpiderMesh;
+    SpiderMesh.meshName = "assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply";
+    SpiderMesh.colour = glm::vec3(1.0f, 0.0f, 0.0f);
+//    SpiderMesh.isWireframe = false;
+    SpiderMesh.position = glm::vec3(-25.0f, 0.0f, 0.0f);
+    ::g_vecMeshesToDraw.push_back(SpiderMesh);
 
     cMeshObject airplane1;
     airplane1.meshName = "assets/models/mig29_xyz_n.ply";
     airplane1.colour = glm::vec3(0.0f, 1.0f, 0.0f);
-    terrainMesh.isWireframe = true;
     airplane1.position = glm::vec3(0.0f, 10.0f, 0.0f);
     airplane1.scale = 25.0f;
     ::g_vecMeshesToDraw.push_back(airplane1);
 
-    //su47.ply red
-    cMeshObject airplane2;
-    airplane2.meshName = "assets/models/su47.ply";
-    airplane2.colour = glm::vec3(1.0f, 0.0f, 0.0f);
-    airplane2.isWireframe = true;
-    airplane2.position = glm::vec3(25.0f, 0.0f, 0.0f);
-    airplane2.scale = 25.0f;
-    ::g_vecMeshesToDraw.push_back(airplane2);
-    
-    //ssj100.ply
-    cMeshObject airplane3;
-    airplane3.meshName = "assets/models/ssj100.ply";
-    airplane3.colour = glm::vec3(0.0f, 1.0f, 1.0f);
-    airplane3.isWireframe = true;
-    airplane3.position = glm::vec3(0.0f, 0.0f, 15.0f);
-    airplane3.scale = 25.0f;
-    ::g_vecMeshesToDraw.push_back(airplane3);
+    cMeshObject mushRoomMesh;
+    mushRoomMesh.meshName = "assets/models/Mushrooms1_xyz_normal.ply";
+    mushRoomMesh.colour = glm::vec3(0.0f, 0.0f, 1.0f);
+    mushRoomMesh.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    mushRoomMesh.scale = 0.1f;
+    mushRoomMesh.orientation.x = -90.0f;         // Note it's being converted into radians
+    ::g_vecMeshesToDraw.push_back(mushRoomMesh);
 
-    //su47.ply yellow
-    cMeshObject airplane4;
-    airplane4.meshName = "assets/models/su47.ply";
-    airplane4.colour = glm::vec3(1.0f, 1.0f, 0.0f);
-    airplane4.isWireframe = true;
-    airplane4.position = glm::vec3(-25.0f, 0.0f, 0.0f);
-    airplane4.scale = 25.0f;
-    ::g_vecMeshesToDraw.push_back(airplane4);
+    cMeshObject toyTruck;
+    toyTruck.meshName = "assets/models/camion jugete_xyz_n.ply";
+    toyTruck.colour = glm::vec3(0.0f, 1.0f, 1.0f);
+    toyTruck.position.x = 4.0f;
+    toyTruck.scale = 5.0f;
+    toyTruck.orientation.y = glm::radians(90.0f);
+    toyTruck.position = glm::vec3(-8.0f, -1.0f, -5.0f);
+    ::g_vecMeshesToDraw.push_back(toyTruck);
 
-    //cMeshObject mushRoomMesh;
-    //mushRoomMesh.meshName = "assets/models/Mushrooms1_xyz_normal.ply";
-    //mushRoomMesh.colour = glm::vec3(0.0f, 0.0f, 1.0f);
-    //mushRoomMesh.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    //mushRoomMesh.scale = 0.1f;
-    //mushRoomMesh.orientation.x = -90.0f;         // Note it's being converted into radians
-    //::g_vecMeshesToDraw.push_back(mushRoomMesh);
-
-    //cMeshObject toyTruck;
-    //toyTruck.meshName = "assets/models/camion jugete_xyz_n.ply";
-    //toyTruck.colour = glm::vec3(0.0f, 1.0f, 1.0f);
-    //toyTruck.position.x = 4.0f;
-    //toyTruck.scale = 5.0f;
-    //toyTruck.orientation.y = glm::radians(90.0f);
-    //toyTruck.position = glm::vec3(-8.0f, -1.0f, -5.0f);
-    //::g_vecMeshesToDraw.push_back(toyTruck);
-
-    //cMeshObject toyTruck2;
-    //toyTruck2.meshName = "assets/models/camion jugete_xyz_n.ply";
-    //toyTruck2.colour = glm::vec3(1.0f, 1.0f, 0.0f);
-    //toyTruck2.position.x = -4.0f;
-    //toyTruck2.scale = 8.0f;
-    //toyTruck2.orientation.x = glm::radians(135.0f);
-    //::g_vecMeshesToDraw.push_back(toyTruck2);
+    cMeshObject toyTruck2;
+    toyTruck2.meshName = "assets/models/camion jugete_xyz_n.ply";
+    toyTruck2.colour = glm::vec3(1.0f, 1.0f, 0.0f);
+    toyTruck2.position.x = -4.0f;
+    toyTruck2.scale = 8.0f;
+    toyTruck2.orientation.x = glm::radians(135.0f);
+    ::g_vecMeshesToDraw.push_back(toyTruck2);
 
 //    mvp_location = glGetUniformLocation(shaderProgram, "MVP");
 
 
-// Vertex layout specification
- //   struct sVertexXYZ_RGB {
-//        float x, y, z;      // vec2 to vec3 
-//        float r, g, b;  };
-//    vpos_location = glGetAttribLocation(shaderProgram, "vPos");
-//    vcol_location = glGetAttribLocation(shaderProgram, "vCol");
-//
-//    glEnableVertexAttribArray(vpos_location);
-//    glVertexAttribPointer(vpos_location, 
-//                          3, 
-//                          GL_FLOAT, 
-//                          GL_FALSE,
-//                          sizeof(sVertexXYZ_RGB),       // sizeof(vertices[0]), 
-//                          (void*)offsetof(sVertexXYZ_RGB, x)); // (void*)0);
-//
-//    glEnableVertexAttribArray(vcol_location);
-//    glVertexAttribPointer(vcol_location, 
-//                          3, 
-//                          GL_FLOAT, 
-//                          GL_FALSE,
-//                          sizeof(sVertexXYZ_RGB),   // sizeof(vertices[0]), 
-//                          (void*)offsetof(sVertexXYZ_RGB, r));
-//                          //(void*)(sizeof(float) * 3));
-////
+    ::g_pTheLights = new cLightManager();
+    ::g_pTheLights->LoadUniformLocationsFromShader(shaderProgram);
+
+    ::g_pTheLights->myLights[0].position = glm::vec4(-5.0f, 15.0f, 0.0f, 1.0f);
+    ::g_pTheLights->myLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);    // light colour
+    float shininess = 1.0f;
+    ::g_pTheLights->myLights[0].specular = glm::vec4(1.0f, 1.0f, 1.0f, shininess);    // light colour
+
+    // To change the "brightness" or the "throw" of the light
+    ::g_pTheLights->myLights[0].atten.x = 1.0f;     // Constant;
+    ::g_pTheLights->myLights[0].atten.y = 0.2f;     // Linear attenuation  
+    ::g_pTheLights->myLights[0].atten.z = 0.01f;    // quadratic attenuation  
+
+    //::g_pTheLights->myLights[0].direction 
+
+    ::g_pTheLights->myLights[0].param1.x = 0.0f;    // 0 = Point light
+
+    ::g_pTheLights->myLights[0].param2.x = 1.0f;    // 1 = on, 0 is off
+
 
     float heyHeyILoveMath = 0.0f;
 
@@ -550,7 +409,84 @@ int main(void)
 
         // Adding clearing the "depth" buffer 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Turn on "depth buffer" testing
+        glEnable(GL_DEPTH_TEST);
 
+        // Update all the light stuff
+        ::g_pTheLights->UpdateLightInfoToShader(shaderProgram);
+
+        if ( g_bShowDebugLightSpheres )
+        {
+
+        }
+
+        // Place the sphere where the light #0 was90Percent
+        {
+            cLightHelper myLightHelper;
+
+            cMeshObject* plightCentre = pFindObjectByFriendlyName("lightCentre");
+            if ( plightCentre)
+            {
+                plightCentre->position = glm::vec3(::g_pTheLights->myLights[0].position);
+            }
+
+            cMeshObject* p90Percent = pFindObjectByFriendlyName("90Percent");
+            if ( p90Percent)
+            {
+                p90Percent->position = glm::vec3(::g_pTheLights->myLights[0].position);
+                // 
+                float distance = myLightHelper.calcApproxDistFromAtten(0.9f,        // Target 90% brightness
+                                                      0.001f,      // Within 0.001 of that value
+                                                      100000.0f,    // Give up if I get this far away
+                                                      ::g_pTheLights->myLights[0].atten.x,
+                                                      ::g_pTheLights->myLights[0].atten.y,
+                                                      ::g_pTheLights->myLights[0].atten.z);
+                p90Percent->scale = distance;
+            }
+
+            cMeshObject* p50Percent = pFindObjectByFriendlyName("50Percent");
+            if (p50Percent)
+            {
+                p50Percent->position = glm::vec3(::g_pTheLights->myLights[0].position);
+                // 
+                float distance = myLightHelper.calcApproxDistFromAtten(0.5f,        // Target 50% brightness
+                                                                       0.001f,      // Within 0.001 of that value
+                                                                       100000.0f,    // Give up if I get this far away
+                                                                       ::g_pTheLights->myLights[0].atten.x,
+                                                                       ::g_pTheLights->myLights[0].atten.y,
+                                                                       ::g_pTheLights->myLights[0].atten.z);
+                p50Percent->scale = distance;
+            }
+
+            cMeshObject* p25Percent = pFindObjectByFriendlyName("25Percent");
+            if (p25Percent)
+            {
+                p25Percent->position = glm::vec3(::g_pTheLights->myLights[0].position);
+
+                float distance = myLightHelper.calcApproxDistFromAtten(0.25f,        // Target 50% brightness
+                                                                       0.001f,      // Within 0.001 of that value
+                                                                       100000.0f,    // Give up if I get this far away
+                                                                       ::g_pTheLights->myLights[0].atten.x,
+                                                                       ::g_pTheLights->myLights[0].atten.y,
+                                                                       ::g_pTheLights->myLights[0].atten.z);
+                p25Percent->scale = distance;
+            }
+
+            cMeshObject* p5Percent = pFindObjectByFriendlyName("5Percent");
+            if (p5Percent)
+            {
+                p5Percent->position = glm::vec3(::g_pTheLights->myLights[0].position);
+
+                float distance = myLightHelper.calcApproxDistFromAtten(0.05f,        // Target 50% brightness
+                                                                       0.001f,      // Within 0.001 of that value
+                                                                       100000.0f,    // Give up if I get this far away
+                                                                       ::g_pTheLights->myLights[0].atten.x,
+                                                                       ::g_pTheLights->myLights[0].atten.y,
+                                                                       ::g_pTheLights->myLights[0].atten.z);
+                p5Percent->scale = distance;
+            }
+
+        }// END OF: Place the sphere where the light #0 was90Percent
 
         // Draw all the stuff in the vector
         for (std::vector< cMeshObject >::iterator itMesh = ::g_vecMeshesToDraw.begin();
@@ -559,6 +495,10 @@ int main(void)
             // Copy the mesh (for ease of reading)
             cMeshObject currentMesh = *itMesh;
 
+            if ( ! currentMesh.bIsVisible )
+            {
+                continue;
+            }
 
     //        mat4x4_identity(m);
             mModel = glm::mat4(1.0f);        // Identity matrix
@@ -629,6 +569,20 @@ int main(void)
                         currentMesh.colour.g,
                         currentMesh.colour.b);
 
+            // Is this a "debug object" (i.e. not lit)
+            //uniform bool bDontLight;
+            GLint bDontLight_UL = glGetUniformLocation(shaderProgram, "bDontLight");
+            if ( currentMesh.bDontLight )
+            {
+                glUniform1f(bDontLight_UL, (float)GL_TRUE);
+            }
+            else
+            {
+                glUniform1f(bDontLight_UL, (float)GL_FALSE);
+            }
+
+
+
             //uniform vec3 positionOffset;
             GLint positionOffset_UL = glGetUniformLocation(shaderProgram, "positionOffset");
             glUniform3f(positionOffset_UL,
@@ -685,11 +639,20 @@ int main(void)
         ssTitle << "Camera (x,y,z): "
             << ::g_cameraEye.x << ", "
             << ::g_cameraEye.y << ", "
-            << ::g_cameraEye.z;
+            << ::g_cameraEye.z
+            << " Light[0]: "
+            << "(xyz: " << ::g_pTheLights->myLights[0].position.x
+            << ", " << ::g_pTheLights->myLights[0].position.y
+            << ", " << ::g_pTheLights->myLights[0].position.z << ") "
+            << " l_atten: " << ::g_pTheLights->myLights[0].atten.y
+            << " q_atten: " << ::g_pTheLights->myLights[0].atten.z;
+
 
         glfwSetWindowTitle( window, ssTitle.str().c_str() );
 
     }
+
+    delete ::g_pTheLights;
 
     glfwDestroyWindow(window);
 
