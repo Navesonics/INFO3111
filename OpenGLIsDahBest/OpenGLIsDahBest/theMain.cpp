@@ -1,19 +1,22 @@
 //#include <glad/glad.h>
 //#define GLFW_INCLUDE_NONE
 //#include <GLFW/glfw3.h>
+
+// 1026434 Evan Benitez
+
+
+
 #include "globalStuff.h"
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
-//#include "linmath.h"
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp> // glm::vec3
 #include <glm/vec4.hpp> // glm::vec4
 #include <glm/mat4x4.hpp> // glm::mat4
 #include <glm/gtc/matrix_transform.hpp> 
-// glm::translate, glm::rotate, glm::scale, glm::perspective
 #include <glm/gtc/type_ptr.hpp> // glm::value_ptr
 
 #include <stdlib.h>
@@ -175,9 +178,10 @@ void handleKeyboardInput(GLFWwindow* window)
         ::g_cameraEye.x += CAMERA_MOVE_SPEED;
         }
     }
-//    if ( glfwGetKey(window, GLFW_KEY_A) )
-//    {
-//    }
+    //if ( glfwGetKey(window, GLFW_KEY_A) )
+    //{
+    //    ::g_cameraEye.x += CAMERA_MOVE_SPEED;
+    //}
     if (glfwGetKey(window, GLFW_KEY_D) )
     {
         // Move "right"
@@ -372,7 +376,7 @@ int main(void)
     cVAOManager* pModelManger = new cVAOManager();
 
     sModelDrawInfo modelILoadedInfo;
-    if ( pModelManger->LoadModelIntoVAO("assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply",
+    /*if ( pModelManger->LoadModelIntoVAO("assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply",
                                         modelILoadedInfo, shaderProgram))
     {
         std::cout << "spider_mastermind loaded OK" << std::endl;
@@ -390,14 +394,21 @@ int main(void)
     pModelManger->LoadModelIntoVAO("assets/models/bun_zipper_xyz_n.ply", modelILoadedInfo, shaderProgram);
     std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
 
-    pModelManger->LoadModelIntoVAO("assets/models/mig29_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
 
     pModelManger->LoadModelIntoVAO("assets/models/camion jugete_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;*/
+
+    pModelManger->LoadModelIntoVAO("assets/models/su47.ply", modelILoadedInfo, shaderProgram);
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " su47 triangles" << std::endl;
+
+    pModelManger->LoadModelIntoVAO("assets/models/ssj100.ply", modelILoadedInfo, shaderProgram);
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << "ssj100 triangles" << std::endl;
+
+    pModelManger->LoadModelIntoVAO("assets/models/mig29_xyz_n.ply", modelILoadedInfo, shaderProgram);
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " mig29 triangles" << std::endl;
 
     pModelManger->LoadModelIntoVAO("assets/models/FractalTerrainFromMeshLab_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
+    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " FractalTerrain triangles" << std::endl;
 
     cMeshObject terrainMesh;
     terrainMesh.meshName = "assets/models/FractalTerrainFromMeshLab_xyz_n.ply";
@@ -406,44 +417,72 @@ int main(void)
     terrainMesh.position = glm::vec3(0.0f, -25.0f, 0.0f);
     ::g_vecMeshesToDraw.push_back(terrainMesh);
 
-    cMeshObject SpiderMesh;
-    SpiderMesh.meshName = "assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply";
-    SpiderMesh.colour = glm::vec3(1.0f, 0.0f, 0.0f);
-    SpiderMesh.isWireframe = false;
-    SpiderMesh.position = glm::vec3(4.0f, -15.0f, 0.0f);
-    ::g_vecMeshesToDraw.push_back(SpiderMesh);
+    //cMeshObject SpiderMesh;
+    //SpiderMesh.meshName = "assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply";
+    //SpiderMesh.colour = glm::vec3(1.0f, 0.0f, 0.0f);
+    //SpiderMesh.isWireframe = false;
+    //SpiderMesh.position = glm::vec3(4.0f, -15.0f, 0.0f);
+    //::g_vecMeshesToDraw.push_back(SpiderMesh);
 
     cMeshObject airplane1;
     airplane1.meshName = "assets/models/mig29_xyz_n.ply";
     airplane1.colour = glm::vec3(0.0f, 1.0f, 0.0f);
+    terrainMesh.isWireframe = true;
     airplane1.position = glm::vec3(0.0f, 10.0f, 0.0f);
     airplane1.scale = 25.0f;
     ::g_vecMeshesToDraw.push_back(airplane1);
 
-    cMeshObject mushRoomMesh;
-    mushRoomMesh.meshName = "assets/models/Mushrooms1_xyz_normal.ply";
-    mushRoomMesh.colour = glm::vec3(0.0f, 0.0f, 1.0f);
-    mushRoomMesh.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    mushRoomMesh.scale = 0.1f;
-    mushRoomMesh.orientation.x = -90.0f;         // Note it's being converted into radians
-    ::g_vecMeshesToDraw.push_back(mushRoomMesh);
+    //su47.ply red
+    cMeshObject airplane2;
+    airplane2.meshName = "assets/models/su47.ply";
+    airplane2.colour = glm::vec3(1.0f, 0.0f, 0.0f);
+    airplane2.isWireframe = true;
+    airplane2.position = glm::vec3(25.0f, 0.0f, 0.0f);
+    airplane2.scale = 25.0f;
+    ::g_vecMeshesToDraw.push_back(airplane2);
+    
+    //ssj100.ply
+    cMeshObject airplane3;
+    airplane3.meshName = "assets/models/ssj100.ply";
+    airplane3.colour = glm::vec3(0.0f, 1.0f, 1.0f);
+    airplane3.isWireframe = true;
+    airplane3.position = glm::vec3(0.0f, 0.0f, 15.0f);
+    airplane3.scale = 25.0f;
+    ::g_vecMeshesToDraw.push_back(airplane3);
 
-    cMeshObject toyTruck;
-    toyTruck.meshName = "assets/models/camion jugete_xyz_n.ply";
-    toyTruck.colour = glm::vec3(0.0f, 1.0f, 1.0f);
-    toyTruck.position.x = 4.0f;
-    toyTruck.scale = 5.0f;
-    toyTruck.orientation.y = glm::radians(90.0f);
-    toyTruck.position = glm::vec3(-8.0f, -1.0f, -5.0f);
-    ::g_vecMeshesToDraw.push_back(toyTruck);
+    //su47.ply yellow
+    cMeshObject airplane4;
+    airplane4.meshName = "assets/models/su47.ply";
+    airplane4.colour = glm::vec3(1.0f, 1.0f, 0.0f);
+    airplane4.isWireframe = true;
+    airplane4.position = glm::vec3(-25.0f, 0.0f, 0.0f);
+    airplane4.scale = 25.0f;
+    ::g_vecMeshesToDraw.push_back(airplane4);
 
-    cMeshObject toyTruck2;
-    toyTruck2.meshName = "assets/models/camion jugete_xyz_n.ply";
-    toyTruck2.colour = glm::vec3(1.0f, 1.0f, 0.0f);
-    toyTruck2.position.x = -4.0f;
-    toyTruck2.scale = 8.0f;
-    toyTruck2.orientation.x = glm::radians(135.0f);
-    ::g_vecMeshesToDraw.push_back(toyTruck2);
+    //cMeshObject mushRoomMesh;
+    //mushRoomMesh.meshName = "assets/models/Mushrooms1_xyz_normal.ply";
+    //mushRoomMesh.colour = glm::vec3(0.0f, 0.0f, 1.0f);
+    //mushRoomMesh.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    //mushRoomMesh.scale = 0.1f;
+    //mushRoomMesh.orientation.x = -90.0f;         // Note it's being converted into radians
+    //::g_vecMeshesToDraw.push_back(mushRoomMesh);
+
+    //cMeshObject toyTruck;
+    //toyTruck.meshName = "assets/models/camion jugete_xyz_n.ply";
+    //toyTruck.colour = glm::vec3(0.0f, 1.0f, 1.0f);
+    //toyTruck.position.x = 4.0f;
+    //toyTruck.scale = 5.0f;
+    //toyTruck.orientation.y = glm::radians(90.0f);
+    //toyTruck.position = glm::vec3(-8.0f, -1.0f, -5.0f);
+    //::g_vecMeshesToDraw.push_back(toyTruck);
+
+    //cMeshObject toyTruck2;
+    //toyTruck2.meshName = "assets/models/camion jugete_xyz_n.ply";
+    //toyTruck2.colour = glm::vec3(1.0f, 1.0f, 0.0f);
+    //toyTruck2.position.x = -4.0f;
+    //toyTruck2.scale = 8.0f;
+    //toyTruck2.orientation.x = glm::radians(135.0f);
+    //::g_vecMeshesToDraw.push_back(toyTruck2);
 
 //    mvp_location = glGetUniformLocation(shaderProgram, "MVP");
 
