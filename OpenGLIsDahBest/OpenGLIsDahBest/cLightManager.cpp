@@ -90,6 +90,14 @@ void cLightManager::LoadUniformLocationsFromShader(GLuint shaderProgram)
 	this->myLights[1].param1_UL =  glGetUniformLocation(shaderProgram, "theLights[1].param1");
 	this->myLights[1].param2_UL =  glGetUniformLocation(shaderProgram, "theLights[1].param2");
 
+	this->myLights[2].position_UL = glGetUniformLocation(shaderProgram, "theLights[2].position");
+	this->myLights[2].diffuse_UL = glGetUniformLocation(shaderProgram, "theLights[2].diffuse");
+	this->myLights[2].specular_UL = glGetUniformLocation(shaderProgram, "theLights[2].specular");
+	this->myLights[2].atten_UL = glGetUniformLocation(shaderProgram, "theLights[2].atten");
+	this->myLights[2].direction_UL = glGetUniformLocation(shaderProgram, "theLights[2].direction");
+	this->myLights[2].param1_UL = glGetUniformLocation(shaderProgram, "theLights[2].param1");
+	this->myLights[2].param2_UL = glGetUniformLocation(shaderProgram, "theLights[2].param2");
+
 	// ... and so on for the other lights...
 
 	return;

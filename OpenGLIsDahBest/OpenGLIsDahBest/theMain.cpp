@@ -1,6 +1,5 @@
-//#include <glad/glad.h>
-//#define GLFW_INCLUDE_NONE
-//#include <GLFW/glfw3.h>
+// 1026434 Evan Wilson Benitez
+
 #include "globalStuff.h"
 
 #include <iostream>
@@ -30,16 +29,6 @@
 
 //#include "../AssimpFileLoaderHelper/AssimpFileLoaderHelper.h"
 
-//static const struct
-//{
-//    float x, y;
-//    float r, g, b;
-//} vertices[3] =
-//{
-//    { -0.6f, -0.4f, 1.f, 0.f, 0.f },            // Spawn a vertex shader instance
-//    {  0.6f, -0.4f, 0.f, 1.f, 0.f },
-//    {   0.f,  0.6f, 0.f, 0.f, 1.f }
-//};
 
 struct sVertexXYZ_RGB
 {
@@ -47,19 +36,6 @@ struct sVertexXYZ_RGB
     float r, g, b;
 };
 
-// Google C++ dynamic array
-// On the heap
-//sVertexXYZ_RGB* pSexyVertex = new sVertexXYZ_RGB[3];
-//
-//// On the stack
-//sVertexXYZ_RGB pVertexArray[3] =
-//{
-//    //   X      Y     Z     r     g     b
-//    { -0.6f, -0.4f, 0.0f, 1.0f, 0.0f, 0.0f },            // Spawn a vertex shader instance
-//    {  0.6f, -0.4f, 0.0f, 1.0f, 0.0f, 0.0f },
-//    {  0.0f,  0.6f, 0.0f, 1.0f, 0.0f, 0.0f }
-// 
-//};
 
 // Will allocate this in a moment...
 sVertexXYZ_RGB* pVertexArray = NULL;    
@@ -87,29 +63,6 @@ bool g_bShowDebugLightSpheres = true;
 
 // Note I'm passing the array by reference so that the pointer
 //  value I create inside the function can be "passed back out".
-//property float x
-//property float y
-//property float z
-//property uchar red
-//property uchar green
-//property uchar blue
-//property uchar alpha
-bool Load_mig29_xyz_rgba_PlyFile(std::string filename,
-                                 sVertexXYZ_RGB* &pVertexArray,
-                                 unsigned int &numVerticesLoaded,
-                                 unsigned int &numTrianglesLoaded);
-//property float x
-//property float y
-//property float z
-//property float nx
-//property float ny
-//property float nz
-//property float s
-//property float t
-bool Load_Mushrooms1_PlyFile(std::string filename,
-                                 sVertexXYZ_RGB* &pVertexArray,
-                                 unsigned int &numVerticesLoaded,
-                                 unsigned int &numTrianglesLoaded);
 
 //property float x
 //property float y
@@ -216,160 +169,75 @@ int main(void)
         std::cout << "spider_mastermind loaded OK" << std::endl;
     }
 
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
-    if ( pModelManger->LoadModelIntoVAO("assets/models/Mushrooms1_xyz_normal.ply",
-                                        modelILoadedInfo, shaderProgram))
-    {
-        std::cout << "Mushrooms1_xyz_normal loaded OK" << std::endl;
-    }
-
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
-
-    pModelManger->LoadModelIntoVAO("assets/models/bun_zipper_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
-
-    pModelManger->LoadModelIntoVAO("assets/models/mig29_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
-
-    pModelManger->LoadModelIntoVAO("assets/models/camion jugete_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
-
-    pModelManger->LoadModelIntoVAO("assets/models/FractalTerrainFromMeshLab_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
-
-    pModelManger->LoadModelIntoVAO("assets/models/Apartment Building_26_xyz_n.ply", modelILoadedInfo, shaderProgram);
-    std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
-
     pModelManger->LoadModelIntoVAO("assets/models/Smooth_UV_Sphere_xyz_n.ply", modelILoadedInfo, shaderProgram);
     std::cout << "Loaded " << modelILoadedInfo.numberOfTriangles << " triangles" << std::endl;
 
-    cMeshObject smallSphereLightCentre;
-    smallSphereLightCentre.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
-    smallSphereLightCentre.colour = glm::vec3(1.0f, 1.0f, 1.0f);
-    smallSphereLightCentre.isWireframe = true;
-    smallSphereLightCentre.scale = 0.25f;
-    smallSphereLightCentre.friendlyName = "lightCentre";
-    smallSphereLightCentre.bDontLight = true;
-    ::g_vecMeshesToDraw.push_back(smallSphereLightCentre);
+    cMeshObject redMovingLight;
+    redMovingLight.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
+    redMovingLight.colour = glm::vec3(0.5f, 0.0f, 0.0f);
+    redMovingLight.isWireframe = true;
+    redMovingLight.scale = 1.0f;
+    redMovingLight.friendlyName = "redMovingLight";
+    redMovingLight.bDontLight = true;
+    ::g_vecMeshesToDraw.push_back(redMovingLight);
+    
 
-    cMeshObject smallSphere90PercentBrightness;
-    smallSphere90PercentBrightness.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
-    smallSphere90PercentBrightness.colour = glm::vec3(0.5f, 0.5f, 0.0f);
-    smallSphere90PercentBrightness.isWireframe = true;
-    smallSphere90PercentBrightness.scale = 2.0f;
-    smallSphere90PercentBrightness.friendlyName = "90Percent";
-    smallSphere90PercentBrightness.bDontLight = true;
-    ::g_vecMeshesToDraw.push_back(smallSphere90PercentBrightness);
+    cMeshObject blueStationaryLight;
+    blueStationaryLight.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
+    blueStationaryLight.colour = glm::vec3(0.0f, 0.0f, 0.5f);
+    blueStationaryLight.isWireframe = true;
+    blueStationaryLight.scale = 0.5f;
+    blueStationaryLight.friendlyName = "blueStationaryLight";
+    blueStationaryLight.bDontLight = true;
+    ::g_vecMeshesToDraw.push_back(blueStationaryLight);
 
-    cMeshObject smallSphere50PercentBrightness;
-    smallSphere50PercentBrightness.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
-    smallSphere50PercentBrightness.colour = glm::vec3(0.0f, 0.5f, 0.5f);
-    smallSphere50PercentBrightness.isWireframe = true;
-    smallSphere50PercentBrightness.scale = 3.0f;
-    smallSphere50PercentBrightness.friendlyName = "50Percent";
-    smallSphere50PercentBrightness.bDontLight = true;
-    ::g_vecMeshesToDraw.push_back(smallSphere50PercentBrightness);
-
-    cMeshObject smallSphere25PercentBrightness;
-    smallSphere25PercentBrightness.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
-    smallSphere25PercentBrightness.colour = glm::vec3(0.0f, 0.5f, 0.0f);
-    smallSphere25PercentBrightness.isWireframe = true;
-    smallSphere25PercentBrightness.scale = 4.0f;
-    smallSphere25PercentBrightness.friendlyName = "25Percent";
-    smallSphere25PercentBrightness.bDontLight = true;
-    ::g_vecMeshesToDraw.push_back(smallSphere25PercentBrightness);
-
-    cMeshObject smallSphere05PercentBrightness;
-    smallSphere05PercentBrightness.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
-    smallSphere05PercentBrightness.colour = glm::vec3(0.5f, 0.0f, 0.5f);
-    smallSphere05PercentBrightness.isWireframe = true;
-    smallSphere05PercentBrightness.scale = 5.0f;
-    smallSphere05PercentBrightness.friendlyName = "5Percent";
-    smallSphere05PercentBrightness.bDontLight = true;
-    ::g_vecMeshesToDraw.push_back(smallSphere05PercentBrightness);
-
-    //std::vector< cMeshObject > g_vecMeshesToDraw;
-//    appartmentBuildingMesh.colour = glm::vec3(0.2f, 0.4f, 0.3f);
-
-   cMeshObject appartmentBuildingMesh;
-    appartmentBuildingMesh.meshName = "assets/models/Apartment Building_26_xyz_n.ply";
-    appartmentBuildingMesh.colour = glm::vec3(0.8f, 0.8f, 0.8f);
-//    appartmentBuildingMesh.isWireframe = true;
-    appartmentBuildingMesh.scale = 1.0f;
-    appartmentBuildingMesh.position = glm::vec3(15.0f, 0.0f, 0.0f);
-    ::g_vecMeshesToDraw.push_back(appartmentBuildingMesh);
-    //std::vector< cMeshObject > g_vecMeshesToDraw;
-//    appartmentBuildingMesh.colour = glm::vec3(0.2f, 0.4f, 0.3f);
-
-
-    cMeshObject terrainMesh;
-    terrainMesh.meshName = "assets/models/FractalTerrainFromMeshLab_xyz_n.ply";
-    terrainMesh.colour = glm::vec3(0.8f, 0.8f, 0.8f);
-//    terrainMesh.isWireframe = true;
-    terrainMesh.position = glm::vec3(0.0f, -210.0f, 0.0f);
-    ::g_vecMeshesToDraw.push_back(terrainMesh);
-
+    cMeshObject yellowStationaryLight;
+    yellowStationaryLight.meshName = "assets/models/Smooth_UV_Sphere_xyz_n.ply";
+    yellowStationaryLight.colour = glm::vec3(0.5f, 0.5f, 0.0f);
+    yellowStationaryLight.isWireframe = true;
+    yellowStationaryLight.scale = 0.5f;
+    yellowStationaryLight.friendlyName = "yellowStationaryLight";
+    yellowStationaryLight.bDontLight = true;
+    ::g_vecMeshesToDraw.push_back(yellowStationaryLight);
+//
     cMeshObject SpiderMesh;
     SpiderMesh.meshName = "assets/models/spider_mastermind.bmd6model.fbx.ascii_Y_up.ply";
-    SpiderMesh.colour = glm::vec3(1.0f, 0.0f, 0.0f);
-//    SpiderMesh.isWireframe = false;
-    SpiderMesh.position = glm::vec3(-25.0f, 0.0f, 0.0f);
+    SpiderMesh.colour = glm::vec3(1.0f, 1.0f, 1.0f);
+    SpiderMesh.position = glm::vec3(-10.0f, 0.0f, 0.0f);
+    SpiderMesh.scale = 0.5f;
     ::g_vecMeshesToDraw.push_back(SpiderMesh);
 
-    cMeshObject airplane1;
-    airplane1.meshName = "assets/models/mig29_xyz_n.ply";
-    airplane1.colour = glm::vec3(0.0f, 1.0f, 0.0f);
-    airplane1.position = glm::vec3(0.0f, 10.0f, 0.0f);
-    airplane1.scale = 25.0f;
-    ::g_vecMeshesToDraw.push_back(airplane1);
-
-    cMeshObject mushRoomMesh;
-    mushRoomMesh.meshName = "assets/models/Mushrooms1_xyz_normal.ply";
-    mushRoomMesh.colour = glm::vec3(0.0f, 0.0f, 1.0f);
-    mushRoomMesh.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    mushRoomMesh.scale = 0.1f;
-    mushRoomMesh.orientation.x = -90.0f;         // Note it's being converted into radians
-    ::g_vecMeshesToDraw.push_back(mushRoomMesh);
-
-    cMeshObject toyTruck;
-    toyTruck.meshName = "assets/models/camion jugete_xyz_n.ply";
-    toyTruck.colour = glm::vec3(0.0f, 1.0f, 1.0f);
-    toyTruck.position.x = 4.0f;
-    toyTruck.scale = 5.0f;
-    toyTruck.orientation.y = glm::radians(90.0f);
-    toyTruck.position = glm::vec3(-8.0f, -1.0f, -5.0f);
-    ::g_vecMeshesToDraw.push_back(toyTruck);
-
-    cMeshObject toyTruck2;
-    toyTruck2.meshName = "assets/models/camion jugete_xyz_n.ply";
-    toyTruck2.colour = glm::vec3(1.0f, 1.0f, 0.0f);
-    toyTruck2.position.x = -4.0f;
-    toyTruck2.scale = 8.0f;
-    toyTruck2.orientation.x = glm::radians(135.0f);
-    ::g_vecMeshesToDraw.push_back(toyTruck2);
-
-//    mvp_location = glGetUniformLocation(shaderProgram, "MVP");
-
-
+    float shininess = 1.0f;
     ::g_pTheLights = new cLightManager();
     ::g_pTheLights->LoadUniformLocationsFromShader(shaderProgram);
 
-    ::g_pTheLights->myLights[0].position = glm::vec4(-5.0f, 15.0f, 0.0f, 1.0f);
-    ::g_pTheLights->myLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);    // light colour
-    float shininess = 1.0f;
-    ::g_pTheLights->myLights[0].specular = glm::vec4(1.0f, 1.0f, 1.0f, shininess);    // light colour
-
+    ::g_pTheLights->myLights[0].position = glm::vec4(0.0f, 15.0f, 0.0f, 1.0f);
+    ::g_pTheLights->myLights[0].diffuse = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);    // light colour
+    ::g_pTheLights->myLights[0].specular = glm::vec4(1.0f, 0.0f, 0.0f, shininess);    // light colour
     // To change the "brightness" or the "throw" of the light
     ::g_pTheLights->myLights[0].atten.x = 1.0f;     // Constant;
     ::g_pTheLights->myLights[0].atten.y = 0.2f;     // Linear attenuation  
     ::g_pTheLights->myLights[0].atten.z = 0.01f;    // quadratic attenuation  
-
-    //::g_pTheLights->myLights[0].direction 
-
     ::g_pTheLights->myLights[0].param1.x = 0.0f;    // 0 = Point light
-
     ::g_pTheLights->myLights[0].param2.x = 1.0f;    // 1 = on, 0 is off
 
+    ::g_pTheLights->myLights[1].position = glm::vec4(-10.0f, 8.f, 0.5f, 1.0f);
+    ::g_pTheLights->myLights[1].diffuse = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);    // light colour
+    ::g_pTheLights->myLights[1].specular = glm::vec4(0.0f, 0.0f, 1.0f, shininess);    // light colour
+    ::g_pTheLights->myLights[1].atten.x = 1.0f;     // Constant;
+    ::g_pTheLights->myLights[1].atten.y = 0.2f;     // Linear attenuation  
+    ::g_pTheLights->myLights[1].atten.z = 0.01f;    // quadratic attenuation  
+    ::g_pTheLights->myLights[1].param1.x = 0.0f;    // 0 = Point light
+    ::g_pTheLights->myLights[1].param2.x = 1.0f;    // 1 = on, 0 is off
+
+    ::g_pTheLights->myLights[2].position = glm::vec4(-10.0f, 0.f, 0.5f, 1.0f);
+    ::g_pTheLights->myLights[2].diffuse = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);    // light colour
+    ::g_pTheLights->myLights[2].specular = glm::vec4(1.0f, 1.0f, 0.0f, shininess);    // light colour
+    ::g_pTheLights->myLights[2].atten.x = 1.0f;     // Constant;
+    ::g_pTheLights->myLights[2].atten.y = 0.2f;     // Linear attenuation  
+    ::g_pTheLights->myLights[2].atten.z = 0.01f;    // quadratic attenuation  
+    ::g_pTheLights->myLights[2].param1.x = 0.0f;    // 0 = Point light
+    ::g_pTheLights->myLights[2].param2.x = 1.0f;    // 1 = on, 0 is off
 
     float heyHeyILoveMath = 0.0f;
 
@@ -424,16 +292,10 @@ int main(void)
         {
             cLightHelper myLightHelper;
 
-            cMeshObject* plightCentre = pFindObjectByFriendlyName("lightCentre");
-            if ( plightCentre)
+            cMeshObject* movingLight_r = pFindObjectByFriendlyName("redMovingLight");
+            if (movingLight_r)
             {
-                plightCentre->position = glm::vec3(::g_pTheLights->myLights[0].position);
-            }
-
-            cMeshObject* p90Percent = pFindObjectByFriendlyName("90Percent");
-            if ( p90Percent)
-            {
-                p90Percent->position = glm::vec3(::g_pTheLights->myLights[0].position);
+                movingLight_r->position = glm::vec3(::g_pTheLights->myLights[0].position);
                 // 
                 float distance = myLightHelper.calcApproxDistFromAtten(0.9f,        // Target 90% brightness
                                                       0.001f,      // Within 0.001 of that value
@@ -441,49 +303,35 @@ int main(void)
                                                       ::g_pTheLights->myLights[0].atten.x,
                                                       ::g_pTheLights->myLights[0].atten.y,
                                                       ::g_pTheLights->myLights[0].atten.z);
-                p90Percent->scale = distance;
+                movingLight_r->scale = distance;
             }
 
-            cMeshObject* p50Percent = pFindObjectByFriendlyName("50Percent");
-            if (p50Percent)
+            cMeshObject* StationaryLight_b = pFindObjectByFriendlyName("blueStationaryLight");
+            if (StationaryLight_b)
             {
-                p50Percent->position = glm::vec3(::g_pTheLights->myLights[0].position);
+                StationaryLight_b->position = glm::vec3(::g_pTheLights->myLights[1].position);
                 // 
-                float distance = myLightHelper.calcApproxDistFromAtten(0.5f,        // Target 50% brightness
+                float distance = myLightHelper.calcApproxDistFromAtten(0.9f,        // Target 50% brightness
                                                                        0.001f,      // Within 0.001 of that value
                                                                        100000.0f,    // Give up if I get this far away
-                                                                       ::g_pTheLights->myLights[0].atten.x,
-                                                                       ::g_pTheLights->myLights[0].atten.y,
-                                                                       ::g_pTheLights->myLights[0].atten.z);
-                p50Percent->scale = distance;
+                                                                       ::g_pTheLights->myLights[1].atten.x,
+                                                                       ::g_pTheLights->myLights[1].atten.y,
+                                                                       ::g_pTheLights->myLights[1].atten.z);
+                StationaryLight_b->scale = distance;
             }
 
-            cMeshObject* p25Percent = pFindObjectByFriendlyName("25Percent");
-            if (p25Percent)
+            cMeshObject* StationaryLight_y = pFindObjectByFriendlyName("yellowStationaryLight");
+            if (StationaryLight_y)
             {
-                p25Percent->position = glm::vec3(::g_pTheLights->myLights[0].position);
+                StationaryLight_y->position = glm::vec3(::g_pTheLights->myLights[2].position);
 
-                float distance = myLightHelper.calcApproxDistFromAtten(0.25f,        // Target 50% brightness
+                float distance = myLightHelper.calcApproxDistFromAtten(0.9f,        // Target 50% brightness
                                                                        0.001f,      // Within 0.001 of that value
                                                                        100000.0f,    // Give up if I get this far away
-                                                                       ::g_pTheLights->myLights[0].atten.x,
-                                                                       ::g_pTheLights->myLights[0].atten.y,
-                                                                       ::g_pTheLights->myLights[0].atten.z);
-                p25Percent->scale = distance;
-            }
-
-            cMeshObject* p5Percent = pFindObjectByFriendlyName("5Percent");
-            if (p5Percent)
-            {
-                p5Percent->position = glm::vec3(::g_pTheLights->myLights[0].position);
-
-                float distance = myLightHelper.calcApproxDistFromAtten(0.05f,        // Target 50% brightness
-                                                                       0.001f,      // Within 0.001 of that value
-                                                                       100000.0f,    // Give up if I get this far away
-                                                                       ::g_pTheLights->myLights[0].atten.x,
-                                                                       ::g_pTheLights->myLights[0].atten.y,
-                                                                       ::g_pTheLights->myLights[0].atten.z);
-                p5Percent->scale = distance;
+                                                                       ::g_pTheLights->myLights[2].atten.x,
+                                                                       ::g_pTheLights->myLights[2].atten.y,
+                                                                       ::g_pTheLights->myLights[2].atten.z);
+                StationaryLight_y->scale = distance;
             }
 
         }// END OF: Place the sphere where the light #0 was90Percent
